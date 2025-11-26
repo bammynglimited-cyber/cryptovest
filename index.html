@@ -202,49 +202,51 @@
   <!-- Scrollable Navigation -->
   <nav class="flex-1 overflow-y-auto px-8 space-y-4">
     <button id="nav-home" class="w-full text-left px-6 py-5 rounded-xl bg-blue-600/30 text-blue-400 text-xl hover:bg-blue-600/40 transition flex items-center justify-between">
-      <span>Dashboard</span>
+       <i data-lucide="layout-dashboard"></i>Dashboard
       <span id="count-overall" class="text-sm text-white/80"></span>
     </button>
     
-    <button id="nav-deposit" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center justify-between">
-      <span>Deposit</span>
+    <button id="nav-deposit" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center justify-between gap-8">
+      <i data-lucide="arrow-down-circle"></i> <span>Deposit</span>
       <span id="count-deposits" class="text-sm text-white/80"></span>
     </button>
     
     <button id="nav-withdraw" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center justify-between">
-      <span>Withdraw</span>
+        <i data-lucide="arrow-up-circle"></i><span>Withdraw</span>
       <span id="count-withdrawals" class="text-sm text-white/80"></span>
     </button>
     
-    <button id="nav-trade" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center gap-3">
-      <i data-lucide="trending-up" class="w-5 h-5"></i>
+    <button id="nav-trade" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center gap-12">
+      <i data-lucide="trending-up"></i>
       <span>Trade</span>
     </button>
     
-    <button id="nav-live-trade" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center gap-3">
+    <button id="nav-live-trade" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center gap-12">
       <i data-lucide="activity" class="w-5 h-5"></i>
       <span>Live Trade</span>
     </button>
     
-    <button id="nav-bot" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center gap-3">
+    <button id="nav-bot" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center gap-12">
       <i data-lucide="bot" class="w-5 h-5"></i>
       <span>Bot</span>
     </button>
     
-    <button id="nav-transactions" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition">
-      Transactions
+    <button id="nav-transactions" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex item center gap-10">
+      <i data-lucide="history" ></i>
+      <span> Transactions</span> 
     </button>
     
-    <button id="nav-kyc" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition">
-      KYC
+    <button id="nav-kyc" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center gap-10">
+      <i data-lucide="camera" ></i>
+      <span>KYC</span>
     </button>
     
-    <button id="nav-settings" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition">
-      Account Settings
+    <button id="nav-settings" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex gap-4">
+         <i data-lucide="settings" ></i>Account Settings
     </button>
     
     <!-- Logout Button -->
-    <button id="btn-logout" class="w-full text-left px-6 py-5 rounded-xl hover:bg-red-600/20 text-red-400 text-xl transition flex items-center gap-3">
+    <button id="btn-logout" class="w-full text-left px-6 py-5 rounded-xl hover:bg-red-600/20 text-red-400 text-xl transition flex items-center gap-7">
       <i data-lucide="log-out" class="w-5 h-5"></i>
       <span>Logout</span>
     </button>
