@@ -681,7 +681,7 @@
     }
 
     function loadPage(p) {
-      ['home','deposit','withdraw','kyc','transactions','settings'].forEach(x => {
+      ['home','deposit','withdraw','trade','live-trade','bot','kyc','transactions','settings'].forEach(x => {
         document.getElementById(x)?.classList.add('hidden');
       });
       document.getElementById(p)?.classList.remove('hidden');
