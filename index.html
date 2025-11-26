@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CryptoVest</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* small extra for overlay scrollbar when sidebar open on mobile */
+    .no-scroll { overflow: hidden; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white min-h-screen">
+
+  <!-- Toasts -->
+  <div id="toast" class="fixed top-4 right-4 z-50 px-6 py-4 rounded-lg bg-green-600 shadow-2xl flex items-center gap-3 opacity-0 transition-opacity duration-300">
+    <i data-lucide="check-circle"></i> <span id="toast-msg"></span>
+  </div>
+  <div id="toast-error" class="fixed top-4 right-4 z-50 px-6 py-4 rounded-lg bg-red-600 shadow-2xl flex items-center gap-3 opacity-0 transition-opacity duration-300">
+    <i data-lucide="alert-circle"></i> <span id="toast-error-msg"></span>
+  </div>
+
+  <!-- Landing -->
+  <div id="landing" class="min-h-screen flex flex-col justify-center items-center text-center p-6">
+    <h1 class="text-7xl font-bold mb-6">CryptoVest</h1>
+    <p class="text-xl mb-12 text-gray-300">Your trusted crypto investment platform</p>
+    <div class="flex gap-6">
+      <button id="btn-signup" class="bg-gradient-to-r from-blue-600 to-cyan-600 px-12 py-6 rounded-2xl text-2xl font-bold hover:scale-105 transition shadow-2xl">
+        Sign Up
+      </button>
+      <button id="btn-login" class="bg-white/10 backdrop-blur-xl border-2 border-white/30 px-12 py-6 rounded-2xl text-2xl font-bold hover:scale-105 transition shadow-2xl">
+        Login
+      </button>
+    </div>
+  </div>
+
+  <!-- Sign Up -->
+  <div id="auth-signup" class="hidden min-h-screen flex items-center justify-center p-6">
+    <div class="bg-white rounded-3xl p-10 max-w-md w-full shadow-2xl">
+      <h1 class="text-3xl font-bold text-center mb-2 text-gray-900">CRYPTOVEST</h1>
+      <h2 class="text-2xl font-semibold mb-2 text-gray-800">Create an Account</h2>
+      <p class="text-gray-600 mb-6 text-sm">You can create account using email or username and the registration is fully free</p>
+      
+      <form id="signup-form" class="space-y-4">
+        <div>
+          <label class="block text-gray-700 mb-2 text-sm font-medium">Full name <span class="text-red-500">*</span></label>
+          <input type="text" id="signup-fullname" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900" required>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-2 text-sm font-medium">Username <span class="text-red-500">*</span></label>
+          <input type="text" id="signup-username" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900" required>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-2 text-sm font-medium">E-Mail Address <span class="text-red-500">*</span></label>
+          <input type="email" id="signup-email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900" required>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-gray-700 mb-2 text-sm font-medium">Country</label>
+            <select id="signup-country" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-900">
+              <option>United States</option>
+              <option>United Kingdom</option>
+              <option>Canada</option>
+              <option>Nigeria</option>
+              <option>South Africa</option>
+              <option>India</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-2 text-sm font-medium">Mobile <span class="text-red-500">*</span></label>
+            <input type="tel" id="signup-mobile" placeholder="+1234567890" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-900" required>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-2 text-sm font-medium">Password <span class="text-red-500">*</span></label>
+          <input type="password" id="signup-password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-900" minlength="6" required>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-2 text-sm font-medium">Confirm Password <span class="text-red-500">*</span></label>
+          <input type="password" id="signup-confirm" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-900" minlength="6" required>
+        </div>
+
+        <div class="bg-gray-900 h-16 rounded-lg flex items-center justify-center cursor-pointer" id="signup-captcha-box">
+          <span class="text-green-400 text-2xl font-mono" id="signup-captcha">A7K9X</span>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-2 text-sm font-medium">Captcha <span class="text-red-500">*</span></label>
+          <input type="text" id="signup-captcha-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-900" required>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="signup-terms" class="w-4 h-4" required>
+          <label class="text-gray-700 text-sm">I agree with <a href="#" class="text-green-600">Privacy Policy</a>, <a href="#" class="text-green-600">Terms and Service</a></label>
+        </div>
+
+        <button type="submit" class="w-full bg-green-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-green-700 transition">
+          Create Account
+        </button>
+      </form>
+      
+      <p class="text-center mt-6 text-gray-700">
+        Already have an account? 
+        <button type="button" id="goto-login" class="text-green-600 hover:text-green-700 font-semibold">Login Account</button>
+      </p>
+      <button type="button" id="signup-back" class="w-full mt-4 text-gray-600 hover:text-gray-900">
+        ← Back to Home
+      </button>
+    </div>
+  </div>
+
+  <!-- Login -->
+  <div id="auth-login" class="hidden min-h-screen flex items-center justify-center p-6">
+    <div class="bg-white rounded-3xl p-10 max-w-md w-full shadow-2xl">
+      <h1 class="text-3xl font-bold text-center mb-2 text-gray-900">CRYPTOVEST</h1>
+      <h2 class="text-2xl font-semibold mb-2 text-gray-800">Login to your account</h2>
+      <p class="text-gray-600 mb-6 text-sm">You can sign in to your account using email or username</p>
+      
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-gray-700 mb-2 text-sm font-medium">Username or Email</label>
+          <input type="text" id="login-email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900" required>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-2 text-sm font-medium">Password</label>
+          <input type="password" id="login-password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-900" required>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="login-remember" class="w-4 h-4">
+            <label class="text-gray-700 text-sm">Keep me Logged in</label>
+          </div>
+          <a href="#" class="text-green-600 text-sm hover:text-green-700">Forgot Password?</a>
+        </div>
+
+        <div class="bg-gray-900 h-16 rounded-lg flex items-center justify-center cursor-pointer" id="login-captcha-box">
+          <span class="text-green-400 text-2xl font-mono" id="login-captcha">9K2RS</span>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-2 text-sm font-medium">Captcha <span class="text-red-500">*</span></label>
+          <input type="text" id="login-captcha-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-900" required>
+        </div>
+
+        <button type="submit" class="w-full bg-green-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-green-700 transition">
+          Login Account
+        </button>
+      </form>
+      
+      <p class="text-center mt-6 text-gray-700">
+        Don't have any account? 
+        <button type="button" id="goto-signup" class="text-green-600 hover:text-green-700 font-semibold">Create Account</button>
+      </p>
+      <button type="button" id="login-back" class="w-full mt-4 text-gray-600 hover:text-gray-900">
+        ← Back to Home
+      </button>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="hidden min-h-screen flex flex-col md:flex-row">
+    <!-- mobile header: menu + title + profile initials -->
+    <header class="w-full md:hidden flex items-center justify-between p-4 border-b border-slate-700 bg-slate-900/70">
+      <button id="mobile-menu-btn" class="p-2 rounded-md bg-slate-800/60">
+        <i data-lucide="menu"></i>
+      </button>
+      <div class="text-xl font-bold">CryptoVest</div>
+      <button id="mobile-profile-btn" class="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center text-black font-bold">--</button>
+    </header>
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-80 bg-slate-800/95 backdrop-blur-lg border-r border-slate-700 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col">
+  
+  <!-- Header (fixed) -->
+  <div class="flex items-center justify-between p-8 pb-6">
+    <h1 class="text-3xl font-bold">CryptoVest</h1>
+    <button id="sidebar-close" class="md:hidden p-2 rounded-md bg-slate-700/40">
+      <i data-lucide="x"></i>
+    </button>
+  </div>
+  
+  <!-- Scrollable Navigation -->
+  <nav class="flex-1 overflow-y-auto px-8 space-y-4">
+    <button id="nav-home" class="w-full text-left px-6 py-5 rounded-xl bg-blue-600/30 text-blue-400 text-xl hover:bg-blue-600/40 transition flex items-center justify-between">
+      <span>Dashboard</span>
+      <span id="count-overall" class="text-sm text-white/80"></span>
+    </button>
+    
+    <button id="nav-deposit" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center justify-between">
+      <span>Deposit</span>
+      <span id="count-deposits" class="text-sm text-white/80"></span>
+    </button>
+    
+    <button id="nav-withdraw" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center justify-between">
+      <span>Withdraw</span>
+      <span id="count-withdrawals" class="text-sm text-white/80"></span>
+    </button>
+    
+    <button id="nav-trade" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center gap-3">
+      <i data-lucide="trending-up" class="w-5 h-5"></i>
+      <span>Trade</span>
+    </button>
+    
+    <button id="nav-live-trade" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center gap-3">
+      <i data-lucide="activity" class="w-5 h-5"></i>
+      <span>Live Trade</span>
+    </button>
+    
+    <button id="nav-bot" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition flex items-center gap-3">
+      <i data-lucide="bot" class="w-5 h-5"></i>
+      <span>Bot</span>
+    </button>
+    
+    <button id="nav-transactions" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition">
+      Transactions
+    </button>
+    
+    <button id="nav-kyc" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition">
+      KYC
+    </button>
+    
+    <button id="nav-settings" class="w-full text-left px-6 py-5 rounded-xl hover:bg-white/10 text-xl transition">
+      Account Settings
+    </button>
+    
+    <!-- Logout Button -->
+    <button id="btn-logout" class="w-full text-left px-6 py-5 rounded-xl hover:bg-red-600/20 text-red-400 text-xl transition flex items-center gap-3">
+      <i data-lucide="log-out" class="w-5 h-5"></i>
+      <span>Logout</span>
+    </button>
+  </nav>
+  
+  <!-- Profile Section (fixed at bottom) -->
+  <div class="p-8 pt-4 border-t border-slate-700 mt-auto">
+    <p class="text-sm text-gray-400 mb-3">Profile</p>
+    <div class="flex items-center gap-3">
+      <div id="sidebar-initials" class="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-black font-bold text-lg">--</div>
+      <div class="flex-1 min-w-0">
+        <div id="sidebar-username" class="text-white font-semibold truncate">User</div>
+        <div id="sidebar-email" class="text-gray-400 text-xs truncate">user@email.com</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+    <!-- overlay for mobile when sidebar open -->
+    <div id="overlay" class="fixed inset-0 z-30 bg-black/40 hidden md:hidden"></div>
+
+    <main id="main-area" class="flex-1 p-6 md:p-12 overflow-auto ml-0 md:ml-80">
+      <!-- top bar for desktop: profile initials on right -->
+      <div class="hidden md:flex items-center justify-end mb-6 gap-4">
+        <div id="top-initials" class="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-black font-bold cursor-pointer">--</div>
+      </div>
+
+      <div id="home">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-4xl font-bold">Dashboard</h2>
+          <div class="flex gap-4 items-center">
+            <div class="text-right">
+              <div class="text-sm text-gray-300">Available Balance</div>
+              <div class="text-3xl font-bold" id="balance">$0.00</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8 mb-12">
+          <div class="bg-gradient-to-br from-blue-600 to-cyan-600 rounded-3xl p-10 text-center shadow-2xl">
+            <p class="text-2xl mb-2">Balance</p>
+            <p class="text-6xl font-bold" id="balance-big">$0.00</p>
+          </div>
+          <div class="bg-gradient-to-br from-purple-600 to-pink-600 rounded-3xl p-10 text-center shadow-2xl">
+            <p class="text-2xl mb-2">Profit</p>
+            <p class="text-6xl font-bold" id="profit">$0.00</p>
+          </div>
+          <div class="bg-gradient-to-br from-green-600 to-emerald-600 rounded-3xl p-10 text-center shadow-2xl">
+            <p class="text-2xl mb-2">Total</p>
+            <p class="text-6xl font-bold" id="total">$0.00</p>
+          </div>
+        </div>
+
+        <!-- lists: pending deposits / withdrawals -->
+        <div class="grid md:grid-cols-2 gap-8">
+          <div class="bg-white/5 rounded-3xl p-6">
+            <h3 class="text-2xl font-semibold mb-4">Recent Deposits</h3>
+            <div id="deposits-list" class="space-y-3 text-sm text-gray-200">
+              <!-- items injected -->
+              <p class="text-gray-400">No deposits yet.</p>
+            </div>
+          </div>
+
+          <div class="bg-white/5 rounded-3xl p-6">
+            <h3 class="text-2xl font-semibold mb-4">Recent Withdrawals</h3>
+            <div id="withdrawals-list" class="space-y-3 text-sm text-gray-200">
+              <p class="text-gray-400">No withdrawals yet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="deposit" class="hidden">
+        <h2 class="text-5xl font-bold mb-10">Deposit Funds</h2>
+        <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-12 max-w-2xl mx-auto">
+          <label class="block text-2xl mb-4">Amount (USD)</label>
+          <input type="number" id="dep-amount" min="300" placeholder="1000" class="w-full px-8 py-6 bg-white/10 rounded-xl text-4xl mb-4 text-center border border-white/20 focus:border-blue-500 focus:outline-none">
+          <p class="text-gray-300 mb-6 text-center">Minimum deposit: $300</p>
+          <button id="btn-deposit" class="w-full bg-green-600 py-6 rounded-xl text-3xl font-bold hover:bg-green-700 transition">
+            Submit Deposit
+          </button>
+        </div>
+      </div>
+
+      <div id="withdraw" class="hidden">
+        <h2 class="text-5xl font-bold mb-10">Withdraw Funds</h2>
+        <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-12 max-w-2xl mx-auto space-y-6">
+          <div id="kyc-warning" class="bg-yellow-600/20 border border-yellow-600 rounded-xl p-6 mb-8 hidden">
+            <p class="text-xl">⚠ KYC verification required for withdrawals. Please complete KYC first.</p>
+          </div>
+
+          <label class="block text-2xl mb-2">Amount (USD)</label>
+          <input type="number" id="withdraw-amount" min="50" placeholder="500" class="w-full px-8 py-4 bg-white/10 rounded-xl text-2xl text-center border border-white/20 focus:border-blue-500 focus:outline-none">
+
+          <label class="block text-2xl mb-2">Destination Wallet / Details</label>
+          <input type="text" id="withdraw-destination" placeholder="BTC wallet address or bank details" class="w-full px-6 py-4 bg-white/10 rounded-xl text-lg mb-4 border border-white/20">
+
+          <div class="flex gap-4">
+            <button id="btn-withdraw" class="flex-1 bg-blue-600 py-4 rounded-xl text-2xl font-bold hover:bg-blue-700 transition">
+              Request Withdrawal
+            </button>
+            <button id="btn-save-withdraw-info" class="bg-white/10 py-4 px-6 rounded-xl text-lg hover:bg-white/20 transition">
+              Save as default
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="kyc" class="hidden">
+        <h2 class="text-5xl font-bold mb-10">KYC Verification</h2>
+        <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-12 max-w-2xl mx-auto space-y-8">
+          <div>
+            <label class="block text-2xl mb-4">ID Front</label>
+            <input type="file" id="kyc-front" accept="image/*" class="w-full px-6 py-4 bg-white/10 rounded-xl border border-white/20">
+          </div>
+          <div>
+            <label class="block text-2xl mb-4">ID Back</label>
+            <input type="file" id="kyc-back" accept="image/*" class="w-full px-6 py-4 bg-white/10 rounded-xl border border-white/20">
+          </div>
+          <button id="btn-kyc" class="w-full bg-purple-600 py-8 rounded-xl text-3xl font-bold hover:bg-purple-700 transition">
+            Submit KYC
+          </button>
+        </div>
+      </div>
+
+      <div id="transactions" class="hidden">
+        <h2 class="text-4xl font-bold mb-6">Transactions</h2>
+        <div id="transactions-list" class="bg-white/5 rounded-3xl p-6 text-sm text-gray-200 space-y-3">
+          <p class="text-gray-400">No transactions yet.</p>
+        </div>
+      </div>
+
+      <!-- Account Settings Section -->
+<div id="settings" class="hidden">
+  <div class="flex items-center justify-between mb-8">
+    <h2 class="text-4xl font-bold">Account Settings</h2>
+  </div>
+
+  <!-- Profile Information Card -->
+  <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 mb-6">
+    <h3 class="text-2xl font-semibold mb-6">Profile Information</h3>
+    
+    <form id="profile-form" class="space-y-6">
+      <!-- Username -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
+        <input 
+          type="text" 
+          id="settings-username" 
+          class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-blue-500 text-white"
+          placeholder="Enter username"
+        >
+      </div>
+
+      <!-- Email (Read-only) -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+        <input 
+          type="email" 
+          id="settings-email" 
+          class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-gray-400 cursor-not-allowed"
+          readonly
+        >
+        <p class="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+      </div>
+
+      <!-- Phone Number -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
+        <input 
+          type="tel" 
+          id="settings-phone" 
+          class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-blue-500 text-white"
+          placeholder="Enter phone number"
+        >
+      </div>
+
+      <!-- Account Balance (Read-only) -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Account Balance</label>
+        <input 
+          type="text" 
+          id="settings-balance" 
+          class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-green-400 cursor-not-allowed font-semibold text-xl"
+          readonly
+        >
+      </div>
+
+      <!-- Save Button -->
+      <button 
+        type="submit" 
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"
+      >
+        Save Changes
+      </button>
+    </form>
+  </div>
+
+  <!-- Change Password Card -->
+  <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 mb-6">
+    <h3 class="text-2xl font-semibold mb-6">Change Password</h3>
+    
+    <form id="password-form" class="space-y-6">
+      <!-- Current Password -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Current Password</label>
+        <input 
+          type="password" 
+          id="current-password" 
+          class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-blue-500 text-white"
+          placeholder="Enter current password"
+        >
+      </div>
+
+      <!-- New Password -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">New Password</label>
+        <input 
+          type="password" 
+          id="new-password" 
+          class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-blue-500 text-white"
+          placeholder="Enter new password"
+        >
+      </div>
+
+      <!-- Confirm New Password -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Confirm New Password</label>
+        <input 
+          type="password" 
+          id="confirm-password" 
+          class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-blue-500 text-white"
+          placeholder="Confirm new password"
+        >
+      </div>
+
+      <!-- Change Password Button -->
+      <button 
+        type="submit" 
+        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"
+      >
+        Change Password
+      </button>
+    </form>
+  </div>
+
+  <!-- Account Info Card -->
+  <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6">
+    <h3 class="text-2xl font-semibold mb-4">Account Information</h3>
+    <div class="space-y-3 text-gray-300">
+      <div class="flex justify-between py-2 border-b border-white/10">
+        <span class="text-gray-400">Account Status:</span>
+        <span class="text-green-400 font-semibold">Active</span>
+      </div>
+      <div class="flex justify-between py-2 border-b border-white/10">
+        <span class="text-gray-400">Member Since:</span>
+        <span id="settings-joined-date">Loading...</span>
+      </div>
+      <div class="flex justify-between py-2 border-b border-white/10">
+        <span class="text-gray-400">KYC Status:</span>
+        <span id="settings-kyc-status" class="text-yellow-400">Pending</span>
+      </div>
+      <div class="flex justify-between py-2">
+        <span class="text-gray-400">User ID:</span>
+        <span id="settings-user-id" class="text-xs text-gray-500">Loading...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+      <!-- Trade Section -->
+<div id="trade" class="hidden">
+  <h2 class="text-4xl font-bold mb-8">Trade</h2>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6">
+      <h3 class="text-2xl font-semibold mb-4">Quick Trade</h3>
+      <p class="text-gray-400 mb-4">Start trading cryptocurrency instantly</p>
+      <!-- Add your trade form/content here -->
+    </div>
+  </div>
+</div>
+
+<!-- Live Trade Section -->
+<div id="live-trade" class="hidden">
+  <h2 class="text-4xl font-bold mb-8">Live Trade</h2>
+  <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6">
+    <h3 class="text-2xl font-semibold mb-4">Live Trading Dashboard</h3>
+    <p class="text-gray-400 mb-4">Monitor and execute live trades</p>
+    <!-- Add your live trade content here -->
+  </div>
+</div>
+
+<!-- Bot Section -->
+<div id="bot" class="hidden">
+  <h2 class="text-4xl font-bold mb-8">Trading Bot</h2>
+  <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6">
+    <h3 class="text-2xl font-semibold mb-4">Automated Trading</h3>
+    <p class="text-gray-400 mb-4">Configure and manage your trading bot</p>
+    <!-- Add your bot configuration content here -->
+  </div>
+</div>
+  </div>
+
+  </div>
+</main>
+
+  <!-- Mock BTC Modal (deposit gateway) -->
+  <div id="btc-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/50"></div>
+    <div class="relative bg-white rounded-3xl p-8 max-w-md w-full text-gray-900">
+      <h3 class="text-2xl font-semibold mb-4">Deposit via BTC (Mock)</h3>
+      <p class="mb-4 text-sm text-gray-600">Send the exact USD-equivalent to the BTC wallet below. After sending, press "I Paid" to notify admin. Admin must confirm the deposit for it to reflect in your balance.</p>
+      <div class="bg-slate-100 rounded-xl p-4 mb-4">
+        <div class="text-xs text-gray-500">Wallet address</div>
+        <div id="btc-address" class="font-mono break-all text-sm mt-2">1Aj...mockAddress</div>
+      </div>
+
+      <div class="flex gap-3">
+        <button id="btc-paid" class="flex-1 bg-green-600 py-3 rounded-lg text-white">I Paid (Notify Admin)</button>
+        <button id="btc-close" class="bg-white/10 py-3 px-4 rounded-lg">Close</button>
+      </div>
+      <p class="mt-3 text-xs text-gray-500">This is a mock gateway. Replace with real BitPay/processor integration later.</p>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Supabase config (keep your values) ----------
+    const SUPABASE_URL = "https://cgfkpokpiseaugcrqjbv.supabase.co";  // ← YOUR URL
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnZmtwb2twaXNlYXVnY3JxamJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMTI0NDYsImV4cCI6MjA3OTU4ODQ0Nn0.C2PpzbzplAG5WOgZbhgqrXi8FD41k8SWpg21utEEvIE";
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ---------- Captcha helpers ----------
+    let signupCaptcha = generateCaptcha();
+    let loginCaptcha = generateCaptcha();
+
+    function generateCaptcha() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let c = '';
+      for (let i = 0; i < 5; i++) c += chars.charAt(Math.floor(Math.random() * chars.length));
+      return c;
+    }
+
+    // ---------- Helper UI ----------
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      t.classList.remove('opacity-0'); t.classList.add('opacity-100');
+      setTimeout(() => { t.classList.remove('opacity-100'); t.classList.add('opacity-0'); }, 4000);
+      lucide.createIcons();
+    }
+    function showToastError(msg) {
+      const t = document.getElementById('toast-error');
+      document.getElementById('toast-error-msg').textContent = msg;
+      t.classList.remove('opacity-0'); t.classList.add('opacity-100');
+      setTimeout(() => { t.classList.remove('opacity-100'); t.classList.add('opacity-0'); }, 4000);
+      lucide.createIcons();
+    }
+
+    // ---------- Page logic ----------
+    document.addEventListener('DOMContentLoaded', async () => {
+      // captchas
+      document.getElementById('signup-captcha').textContent = signupCaptcha;
+      document.getElementById('login-captcha').textContent = loginCaptcha;
+      lucide.createIcons();
+
+      // check session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) showDashboard(session.user);
+
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session) showDashboard(session.user);
+        if (event === 'SIGNED_OUT') location.reload();
+      });
+
+      // nav buttons
+      document.getElementById('btn-signup').addEventListener('click', () => showPage('auth-signup'));
+      document.getElementById('btn-login').addEventListener('click', () => showPage('auth-login'));
+      document.getElementById('goto-login').addEventListener('click', () => showPage('auth-login'));
+      document.getElementById('goto-signup').addEventListener('click', () => showPage('auth-signup'));
+      document.getElementById('signup-back').addEventListener('click', () => showPage('landing'));
+      document.getElementById('login-back').addEventListener('click', () => showPage('landing'));
+
+      // captcha refresh
+      document.getElementById('signup-captcha-box').addEventListener('click', () => {
+        signupCaptcha = generateCaptcha(); document.getElementById('signup-captcha').textContent = signupCaptcha;
+      });
+      document.getElementById('login-captcha-box').addEventListener('click', () => {
+        loginCaptcha = generateCaptcha(); document.getElementById('login-captcha').textContent = loginCaptcha;
+      });
+
+      // forms
+      document.getElementById('signup-form').addEventListener('submit', handleSignup);
+      document.getElementById('login-form').addEventListener('submit', handleLogin);
+
+      // dashboard nav
+      document.getElementById('nav-home').addEventListener('click', () => loadPage('home'));
+      document.getElementById('nav-deposit').addEventListener('click', () => loadPage('deposit'));
+      document.getElementById('nav-withdraw').addEventListener('click', () => loadPage('withdraw'));
+      document.getElementById('nav-kyc').addEventListener('click', () => loadPage('kyc'));
+      document.getElementById('nav-transactions').addEventListener('click', () => loadPage('transactions'));
+      document.getElementById('nav-settings').addEventListener('click', () => loadPage('settings'));
+      document.getElementById('nav-trade').addEventListener('click', ()=> loadPage('trade'));
+      document.getElementById('nav-live-trade').addEventListener('click', ()=> loadPage('live-trade'));
+      document.getElementById('nav-bot').addEventListener('click', ()=> loadPage('bot'));
+      document.getElementById('btn-logout').addEventListener('click', logout);
+      
+
+      // actions
+      document.getElementById('btn-deposit').addEventListener('click', submitDeposit);
+      document.getElementById('btn-withdraw').addEventListener('click', submitWithdraw);
+      document.getElementById('btn-save-withdraw-info').addEventListener('click', saveWithdrawInfo);
+      document.getElementById('btn-kyc').addEventListener('click', uploadKYC);
+
+      // mobile menu
+      document.getElementById('mobile-menu-btn').addEventListener('click', openSidebar);
+      document.getElementById('sidebar-close').addEventListener('click', closeSidebar);
+      document.getElementById('overlay').addEventListener('click', closeSidebar);
+
+      // profile
+      document.getElementById('top-initials').addEventListener('click', openProfileModal);
+      document.getElementById('mobile-profile-btn').addEventListener('click', openProfileModal);
+      document.getElementById('sidebar-initials').addEventListener('click', openProfileModal);
+      document.getElementById('profile-cancel').addEventListener('click', closeProfileModal);
+      document.getElementById('profile-form').addEventListener('submit', saveProfile);
+
+      // btc modal
+      document.getElementById('btc-close').addEventListener('click', closeBTCModal);
+      document.getElementById('btc-paid').addEventListener('click', notifyAdminPaid);
+
+      // realtime: subscribe to deposits/withdrawals changes so user's dashboard auto-refreshes
+      setupRealtime();
+
+    });
+
+    function showPage(p) {
+      ['landing', 'auth-signup', 'auth-login', 'dashboard'].forEach(page => {
+        document.getElementById(page)?.classList.add('hidden');
+      });
+      document.getElementById(p)?.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function loadPage(p) {
+      ['home','deposit','withdraw','kyc','transactions','settings'].forEach(x => {
+        document.getElementById(x)?.classList.add('hidden');
+      });
+      document.getElementById(p)?.classList.remove('hidden');
+      // close mobile sidebar
+      closeSidebar();
+      lucide.createIcons();
+    }
+
+    // ---------- Auth handlers ----------
+    async function handleSignup(e) {
+      e.preventDefault();
+      const fullname = document.getElementById('signup-fullname').value.trim();
+      const username = document.getElementById('signup-username').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+      const confirm = document.getElementById('signup-confirm').value;
+      const country = document.getElementById('signup-country').value;
+      const mobile = document.getElementById('signup-mobile').value;
+      const captchaInput = document.getElementById('signup-captcha-input').value;
+      const terms = document.getElementById('signup-terms').checked;
+
+      if (!supabase) { showToastError('Database not connected'); return; }
+      if (password !== confirm) { showToastError('Passwords do not match!'); return; }
+      if (captchaInput.toUpperCase() !== signupCaptcha) {
+        showToastError('Incorrect captcha!'); signupCaptcha = generateCaptcha();
+        document.getElementById('signup-captcha').textContent = signupCaptcha;
+        document.getElementById('signup-captcha-input').value = '';
+        return;
+      }
+      if (!terms) { showToastError('Accept terms and conditions'); return; }
+
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { username, fullname, country, mobile } }
+        });
+        if (error) throw error;
+        if (data.user) {
+          // create wallets + profiles rows
+          await supabase.from('wallets').insert({ user_id: data.user.id, balance_usd: 0, profit: 0 });
+          await supabase.from('profiles').insert({
+            id: data.user.id,
+            username,
+            fullname,
+            country,
+            mobile,
+            kyc_status: 'pending'
+          });
+          showToast('Account created! Check your email.');
+          setTimeout(() => showPage('auth-login'), 1800);
+        }
+      } catch (err) {
+        showToastError(err.message || 'Signup error');
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const emailOrUsername = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      const captchaInput = document.getElementById('login-captcha-input').value;
+
+      if (!supabase) { showToastError('Database not connected'); return; }
+      if (captchaInput.toUpperCase() !== loginCaptcha) {
+        showToastError('Incorrect captcha!'); loginCaptcha = generateCaptcha();
+        document.getElementById('login-captcha').textContent = loginCaptcha;
+        document.getElementById('login-captcha-input').value = '';
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: emailOrUsername,
+          password
+        });
+        if (error) throw error;
+        if (data.user) {
+          showToast('Login successful!');
+          showDashboard(data.user);
+        }
+      } catch (err) {
+        showToastError('Invalid credentials');
+      }
+    }
+
+    async function logout() {
+      if (!supabase) return;
+      try {
+        await supabase.auth.signOut();
+        location.reload();
+      } catch (err) {
+        showToastError('Logout failed');
+      }
+    }
+
+    // ---------- Dashboard + user data ----------
+    let currentUser = null;
+    async function showDashboard(user) {
+      currentUser = user;
+      showPage('dashboard');
+      loadUserData(user);
+      loadSidebarProfile(user);
+      loadDepositsAndWithdrawals(user);
+      loadTransactions(user);
+      // show initials on buttons
+      setInitialsUI(user);
+    }
+
+   async function loadUserData(user) {
+  if (!supabase) return;
+  try {
+    const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', user.id).single();
+    if (wallet) {
+      document.getElementById('balance').textContent = `$${parseFloat(wallet.balance_usd || 0).toFixed(2)}`;
+      document.getElementById('balance-big').textContent = `$${parseFloat(wallet.balance_usd || 0).toFixed(2)}`;
+      document.getElementById('profit').textContent = `$${parseFloat(wallet.profit || 0).toFixed(2)}`;
+      const total = parseFloat(wallet.balance_usd || 0) + parseFloat(wallet.profit || 0);
+      document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+    }
+  } catch (err) {
+    console.error('Error loading wallet:', err);
+  }
+}
+
+async function loadSidebarProfile(user) {
+  if (!supabase) return;
+  try {
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+    document.getElementById('sidebar-username').textContent = profile?.username || user.email;
+    document.getElementById('sidebar-email').textContent = user.email;
+    const initials = getInitials(profile?.fullname || profile?.username || user.email);
+    document.getElementById('sidebar-initials').textContent = initials;
+    document.getElementById('top-initials').textContent = initials;
+    document.getElementById('mobile-profile-btn').textContent = initials;
+    // store profile in DOM dataset for quick edit
+    document.getElementById('sidebar').dataset.profile = JSON.stringify(profile || {});
+  } catch (err) {
+    console.error('Error loading profile:', err);
+  }
+}
+
+function getInitials(fullname) {
+  if (!fullname) return '--';
+  // take first two letters of the full name or username
+  return fullname.trim().slice(0,2).toUpperCase();
+}
+
+function setInitialsUI(user) {
+  const initials = '??';
+  // top-initials set in loadSidebarProfile
+}
+
+// ---------- Deposits / Withdrawals lists ----------
+async function loadDepositsAndWithdrawals(user) {
+  if (!supabase || !user) return;
+  try {
+    // counts
+    const { data: deposits } = await supabase.from('deposits').select('*').eq('user_id', user.id).order('created_at', {ascending: false});
+    const { data: withdrawals } = await supabase.from('withdrawals').select('*').eq('user_id', user.id).order('created_at', {ascending: false});
+
+    document.getElementById('count-deposits').textContent = deposits?.length ? deposits.length : '';
+    document.getElementById('count-withdrawals').textContent = withdrawals?.length ? withdrawals.length : '';
+    document.getElementById('count-overall').textContent = (deposits?.length || 0) + (withdrawals?.length || 0);
+
+    // deposits list
+    const depositList = document.getElementById('deposits-list');
+    depositList.innerHTML = '';
+    if (!deposits || deposits.length === 0) {
+      depositList.innerHTML = '<p class="text-gray-400">No deposits yet.</p>';
+    } else {
+      deposits.slice(0,5).forEach(d => {
+        const el = document.createElement('div');
+        el.className = 'p-3 bg-white/3 rounded-lg flex justify-between items-center';
+        el.innerHTML = `<div>
+                          <div class="font-medium">${formatCurrency(d.amount)}</div>
+                          <div class="text-xs text-gray-400">${new Date(d.created_at).toLocaleString()}</div>
+                        </div>
+                        <div class="text-sm ${d.status === 'confirmed' ? 'text-green-300' : (d.status === 'pending' ? 'text-yellow-300' : 'text-gray-400')}">
+                          ${d.status}
+                        </div>`;
+        depositList.appendChild(el);
+      });
+    }
+
+    // withdrawals list
+    const withdrawalsList = document.getElementById('withdrawals-list');
+    withdrawalsList.innerHTML = '';
+    if (!withdrawals || withdrawals.length === 0) {
+      withdrawalsList.innerHTML = '<p class="text-gray-400">No withdrawals yet.</p>';
+    } else {
+      withdrawals.slice(0,5).forEach(w => {
+        const el = document.createElement('div');
+        el.className = 'p-3 bg-white/3 rounded-lg flex justify-between items-center';
+        el.innerHTML = `<div>
+                            <div class="font-medium">${formatCurrency(w.amount)}</div>
+                            <div class="text-xs text-gray-400">${new Date(w.created_at).toLocaleString()}</div>
+                          </div>
+                          <div class="text-sm ${w.status === 'paid' ? 'text-green-300' : (w.status === 'pending' ? 'text-yellow-300' : 'text-gray-400')}">
+                            ${w.status}
+                          </div>`;
+        withdrawalsList.appendChild(el);
+      });
+    }
+  } catch (err) {
+    console.error('Error loading deposits/withdrawals:', err);
+  }
+}
+// Load user settings with detailed logging
+async function loadSettings() {
+  console.log('=== loadSettings() called ===');
+  
+  try {
+    // Step 1: Get current user
+    console.log('Step 1: Getting user...');
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError) {
+      console.error('User error:', userError);
+      alert('Authentication error. Please log in again.');
+      return;
+    }
+    
+    if (!user) {
+      console.error('No user logged in');
+      alert('Please log in to view settings');
+      return;
+    }
+    
+    console.log('User found:', user.id, user.email);
+    
+    // Step 2: Get user profile from database
+    console.log('Step 2: Fetching profile from database...');
+    const { data: profile, error: profileError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    
+    if (profileError) {
+      console.error('Profile error:', profileError);
+      alert('Error loading profile: ' + profileError.message);
+      return;
+    }
+    
+    console.log('Profile data:', profile);
+    
+    // Step 3: Check if elements exist
+    const elements = {
+      username: document.getElementById('settings-username'),
+      email: document.getElementById('settings-email'),
+      phone: document.getElementById('settings-phone'),
+      balance: document.getElementById('settings-balance'),
+      userId: document.getElementById('settings-user-id'),
+      joinedDate: document.getElementById('settings-joined-date'),
+      kycStatus: document.getElementById('settings-kyc-status')
+    };
+    
+    console.log('Elements found:', {
+      username: !!elements.username,
+      email: !!elements.email,
+      phone: !!elements.phone,
+      balance: !!elements.balance,
+      userId: !!elements.userId,
+      joinedDate: !!elements.joinedDate,
+      kycStatus: !!elements.kycStatus
+    });
+    
+    // Step 4: Populate fields
+    if (elements.username) elements.username.value = profile?.username || '';
+    if (elements.email) elements.email.value = user.email || '';
+    if (elements.phone) elements.phone.value = profile?.phone || '';
+    if (elements.balance) elements.balance.value = `$${parseFloat(profile?.balance || 0).toFixed(2)}`;
+    
+    // Update Account Information
+    if (elements.userId) {
+      elements.userId.textContent = user.id;
+      console.log('User ID set:', user.id);
+    }
+    
+    if (elements.joinedDate) {
+      if (profile?.created_at) {
+        const joinDate = new Date(profile.created_at);
+        const formattedDate = joinDate.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        elements.joinedDate.textContent = formattedDate;
+        console.log('Join date set:', formattedDate);
+      } else {
+        elements.joinedDate.textContent = 'Not available';
+        console.log('No created_at date found');
+      }
+    }
+    
+    if (elements.kycStatus) {
+      const kycStatus = profile?.kyc_status || 'Pending';
+      elements.kycStatus.textContent = kycStatus;
+      
+      // Apply color
+      if (kycStatus === 'Verified' || kycStatus === 'verified') {
+        elements.kycStatus.className = 'text-green-400 font-semibold';
+      } else if (kycStatus === 'Rejected' || kycStatus === 'rejected') {
+        elements.kycStatus.className = 'text-red-400 font-semibold';
+      } else {
+        elements.kycStatus.className = 'text-yellow-400 font-semibold';
+      }
+      console.log('KYC status set:', kycStatus);
+    }
+    
+    console.log('=== loadSettings() completed successfully ===');
+    
+  } catch (err) {
+    console.error('=== loadSettings() FAILED ===');
+    console.error('Error details:', err);
+    alert('Failed to load settings: ' + err.message);
+  }
+}
+
+// Navigation to settings - make sure this exists!
+document.getElementById('nav-settings')?.addEventListener('click', () => {
+  console.log('Settings navigation clicked');
+  showSection('settings');
+  updateActiveNav('nav-settings');
+  
+  // Small delay to ensure section is visible before loading
+  setTimeout(() => {
+    loadSettings();
+  }, 100);
+});
+
+// Call loadSettings when user clicks Account Settings
+document.getElementById('nav-settings').addEventListener('click', () => {
+  showSection('settings');
+  updateActiveNav('nav-settings');
+  loadSettings(); // Load settings data
+});
+
+// Save profile changes
+document.getElementById('profile-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const username = document.getElementById('settings-username').value.trim();
+  const phone = document.getElementById('settings-phone').value.trim();
+  
+  if (!username) {
+    alert('Username cannot be empty');
+    return;
+  }
+  
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      alert('Please log in first');
+      return;
+    }
+    
+    // Update user profile in database
+    const { error } = await supabase
+      .from('users')
+      .update({
+        username: username,
+        phone: phone
+      })
+      .eq('id', user.id);
+    
+    if (error) throw error;
+    
+    alert('Profile updated successfully!');
+    
+    // Refresh sidebar to show updated username
+    updateSidebarProfile(user);
+    
+    // Reload settings to show updated data
+    loadSettings();
+    
+  } catch (err) {
+    console.error('Error updating profile:', err);
+    alert('Failed to update profile: ' + err.message);
+  }
+})
+
+// Change password
+document.getElementById('password-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const currentPassword = document.getElementById('current-password').value;
+  const newPassword = document.getElementById('new-password').value;
+  const confirmPassword = document.getElementById('confirm-password').value;
+  
+  // Validation
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    alert('Please fill in all password fields');
+    return;
+  }
+  
+  if (newPassword !== confirmPassword) {
+    alert('New passwords do not match!');
+    return;
+  }
+  
+  if (newPassword.length < 6) {
+    alert('Password must be at least 6 characters long');
+    return;
+  }
+  
+  try {
+    // Update password in Supabase
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+    
+    if (error) throw error;
+    
+    alert('Password changed successfully!');
+    
+    // Clear the form
+    document.getElementById('password-form').reset();
+    
+  } catch (err) {
+    console.error('Error changing password:', err);
+    alert('Failed to change password: ' + err.message);
+  }
+});
+
+
+// Call loadSettings when navigating to settings
+document.getElementById('nav-settings').addEventListener('click', async () => {
+  showSection('settings');
+  updateActiveNav('nav-settings');
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  loadSettings(user);
+});
+
+async function loadTransactions(user) {
+  if (!supabase || !user) return;
+  try {
+    // Example: join deposits + withdrawals into transactions list
+    const { data: deposits } = await supabase.from('deposits').select('*').eq('user_id', user.id);
+    const { data: withdrawals } = await supabase.from('withdrawals').select('*').eq('user_id', user.id);
+    const tx = [];
+    (deposits || []).forEach(d => tx.push({ type: 'Deposit', amount: d.amount, status: d.status, created_at: d.created_at }));
+    (withdrawals || []).forEach(w => tx.push({ type: 'Withdraw', amount: w.amount, status: w.status, created_at: w.created_at }));
+    tx.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+    const list = document.getElementById('transactions-list');
+    list.innerHTML = '';
+    if (tx.length === 0) list.innerHTML = '<p class="text-gray-400">No transactions yet.</p>';
+    else {
+      tx.forEach(t => {
+        const el = document.createElement('div');
+        el.className = 'p-3 bg-white/3 rounded-lg flex justify-between items-center';
+        el.innerHTML = `<div>
+                          <div class="font-medium">${t.type}</div>
+                          <div class="text-xs text-gray-400">${new Date(t.created_at).toLocaleString()}</div>
+                        </div>
+                        <div class="text-sm">${formatCurrency(t.amount)} <div class="text-xs">${t.status}</div></div>`;
+        list.appendChild(el);
+      });
+    }
+  } catch (err) {
+    console.error('Error loading transactions:', err);
+  }
+}
+
+function formatCurrency(v) {
+  return `$${parseFloat(v || 0).toFixed(2)}`;
+}
+
+// ---------- Submit deposit (creates pending deposit + opens mock gateway) ----------
+let lastCreatedDepositId = null;
+async function submitDeposit() {
+  const amount = parseFloat(document.getElementById('dep-amount').value);
+  if (!amount || amount < 300) { showToastError('Minimum deposit is $300'); return; }
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { showToastError('Not signed in'); return; }
+
+    // insert pending deposit row
+    const { data, error } = await supabase.from('deposits').insert({
+      user_id: user.id,
+      amount,
+      status: 'pending'
+    }).select().single();
+
+    if (error) throw error;
+    lastCreatedDepositId = data.id;
+
+    // open mock BTC modal with mock address (you will replace with real gateway)
+    openBTCModal(data);
+    showToast('Deposit request submitted! Follow payment instructions.');
+    document.getElementById('dep-amount').value = '';
+    // Refresh lists
+    loadDepositsAndWithdrawals(user);
+  } catch (err) {
+    showToastError('Deposit failed: ' + (err.message || err));
+  }
+}
+
+// show btc modal
+function openBTCModal(depositRow) {
+  // generate a mock BTC address (replace with real gateway integration later)
+  const mock = 'btc_mock_' + Math.random().toString(36).slice(2,12);
+  document.getElementById('btc-address').textContent = mock + ' (mock)';
+  document.getElementById('btc-modal').classList.remove('hidden');
+  document.body.classList.add('no-scroll');
+}
+function closeBTCModal() {
+  document.getElementById('btc-modal').classList.add('hidden');
+  document.body.classList.remove('no-scroll');
+}
+
+// When user clicks "I Paid" — notify admin or (for testing) optionally set to awaiting_confirmation.
+async function notifyAdminPaid() {
+  if (!lastCreatedDepositId) {
+    showToastError('No deposit to confirm');
+    return;
+  }
+  try {
+    // update deposit to 'awaiting_admin' so admin knows user claims to have paid
+    const { error } = await supabase.from('deposits').update({ status: 'awaiting_confirmation' }).eq('id', lastCreatedDepositId);
+    if (error) throw error;
+    showToast('Payment notification sent to admin. Awaiting confirmation.');
+    closeBTCModal();
+    // refresh data
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) loadDepositsAndWithdrawals(user);
+  } catch (err) {
+    showToastError('Failed to notify admin: ' + err.message);
+  }
+}
+
+// ---------- Withdraw flow ----------
+async function submitWithdraw() {
+  const amount = parseFloat(document.getElementById('withdraw-amount').value);
+  const destination = document.getElementById('withdraw-destination').value.trim();
+  if (!amount || amount < 50) { showToastError('Minimum withdrawal is $50'); return; }
+  if (!destination) { showToastError('Please enter destination wallet/bank details'); return; }
+  if (!supabase) { showToastError('Database not connected'); return; }
+
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { showToastError('Not signed in'); return; }
+
+    // KYC check
+    const { data: profile } = await supabase.from('profiles').select('kyc_status').eq('id', user.id).single();
+    if (!profile || profile.kyc_status !== 'approved') {
+      document.getElementById('kyc-warning').classList.remove('hidden');
+      showToastError('KYC verification required');
+      return;
+    }
+
+    const { error } = await supabase.from('withdrawals').insert({
+      user_id: user.id,
+      amount,
+      destination,
+      status: 'pending'
+    });
+    if (error) throw error;
+    showToast('Withdrawal requested!');
+    document.getElementById('withdraw-amount').value = '';
+    loadDepositsAndWithdrawals(user);
+  } catch (err) {
+    showToastError('Withdrawal failed: ' + (err.message || err));
+  }
+}
+
+// Save withdraw info in user's profile (so it pre-fills next time)
+async function saveWithdrawInfo() {
+  const dest = document.getElementById('withdraw-destination').value.trim();
+  if (!dest) { showToastError('Enter details first'); return; }
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { showToastError('Not signed in'); return; }
+    const { error } = await supabase.from('profiles').update({ withdraw_info: dest }).eq('id', user.id);
+    if (error) throw error;
+    showToast('Withdraw info saved to profile');
+  } catch (err) {
+    showToastError('Save failed: ' + err.message);
+  }
+}
+
+// ---------- KYC upload ----------
+async function uploadKYC() {
+  const front = document.getElementById('kyc-front').files[0];
+  const back = document.getElementById('kyc-back').files[0];
+  if (!front || !back) { showToastError('Upload both ID images'); return; }
+  if (!supabase) { showToastError('Database not connected'); return; }
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { showToastError('Not signed in'); return; }
+
+    const frontName = `users/${user.id}/front_${Date.now()}.jpg`;
+    const backName = `users/${user.id}/back_${Date.now()}.jpg`;
+
+    const { error: frontError } = await supabase.storage.from('kyc').upload(frontName, front, { upsert: true });
+    if (frontError) throw frontError;
+    const { error: backError } = await supabase.storage.from('kyc').upload(backName, back, { upsert: true });
+    if (backError) throw backError;
+
+    const { error: updateError } = await supabase.from('profiles').update({ kyc_status: 'pending' }).eq('id', user.id);
+    if (updateError) throw updateError;
+
+    showToast('KYC submitted!');
+    document.getElementById('kyc-front').value = '';
+    document.getElementById('kyc-back').value = '';
+  } catch (err) {
+    showToastError('KYC upload failed: ' + (err.message || err));
+  }
+}
+// ---------- Mobile sidebar handlers ----------
+function openSidebar() {
+  document.getElementById('sidebar').classList.remove('-translate-x-full');
+  document.getElementById('overlay').classList.remove('hidden');
+  document.body.classList.add('no-scroll');
+}
+function closeSidebar() {
+  // hide only on mobile screens
+  if (window.innerWidth < 768) {
+    document.getElementById('sidebar').classList.add('-translate-x-full');
+    document.getElementById('overlay').classList.add('hidden');
+    document.body.classList.remove('no-scroll');
+  }
+}
+
+// ---------- Realtime subscription (deposits/withdrawals) ----------
+function setupRealtime() {
+  try {
+    // subscribe to changes on deposits & withdrawals (public schema)
+    // When admin updates deposit status to 'confirmed', update wallet and lists automatically.
+    const channel = supabase.channel('public-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'deposits' }, payload => {
+        // If deposit changed for current user, refresh lists and wallet
+        const rec = payload.record;
+        const userId = rec?.user_id;
+        supabase.auth.getUser().then(({ data: { user }}) => {
+          if (user && user.id === userId) {
+            // if confirmed, we must update wallet display (wallet update likely handled by backend - here we just re-fetch)
+            loadUserData(user);
+            loadDepositsAndWithdrawals(user);
+            loadTransactions(user);
+          }
+        }).catch(()=>{});
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'withdrawals' }, payload => {
+        const rec = payload.record;
+        const userId = rec?.user_id;
+        supabase.auth.getUser().then(({ data: { user }}) => {
+          if (user && user.id === userId) {
+            loadDepositsAndWithdrawals(user);
+            loadTransactions(user);
+          }
+        }).catch(()=>{});
+      })
+      .subscribe(status => {
+        // status shows SUBSCRIBED etc.
+        console.log('realtime status', status);
+      });
+  } catch (err) {
+    console.warn('Realtime setup failed (check Supabase realtime config):', err);
+  }
+}
+
+// ---------- Small helpers ----------
+function formatDate(d) {
+  try { return new Date(d).toLocaleString(); } catch(e) { return d; }
+}
+ 
+  </script>
+</body>
+</html>
